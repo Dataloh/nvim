@@ -15,3 +15,4 @@ vim.g.mapleader = " "
 
 require("lazy").setup(require("cfhl.lazy"))
 require("cfhl")
+

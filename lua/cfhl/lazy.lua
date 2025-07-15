@@ -1,4 +1,131 @@
 return {
+  -- LSP configuration
+  {
+    "neovim/nvim-lspconfig",
+    dependencies = {
+      "williamboman/mason.nvim",
+      "williamboman/mason-lspconfig.nvim",
+      "hrsh7th/nvim-cmp",           -- Completion plugin
+      "hrsh7th/cmp-nvim-lsp",       -- LSP source for nvim-cmp
+      "hrsh7th/cmp-buffer",         -- Buffer completions
+      "hrsh7th/cmp-path",           -- Path completions
+      "hrsh7th/cmp-cmdline",        -- Cmdline completions
+      "L3MON4D3/LuaSnip",           -- Snippet engine
+      "saadparwaiz1/cmp_luasnip",   -- Snippet completions
+    },
+    config = function()
+      -- Setup mason
+      require("mason").setup()
+      require("mason-lspconfig").setup({
+        ensure_installed = {
+          "lua_ls",
+          "gopls",
+          "jdtls",
+          "ansiblels",
+          "ts_ls",    -- JavaScript/TypeScript
+          "pyright",  -- Python
+        },
+        automatic_installation = true,
+      })
+
+      local lspconfig = require("lspconfig")
+
+      -- Setup nvim-cmp.
+      local cmp = require("cmp")
+      local luasnip = require("luasnip")
+
+      cmp.setup({
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body)
+          end,
+        },
+        mapping = cmp.mapping.preset.insert({
+          ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+          ["<C-f>"] = cmp.mapping.scroll_docs(4),
+          ["<C-Space>"] = cmp.mapping.complete(),
+          ["<C-e>"] = cmp.mapping.abort(),
+          ["<CR>"] = cmp.mapping.confirm({ select = true }),
+          ["<Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.expand_or_jumpable() then
+              luasnip.expand_or_jump()
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+          ["<S-Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif luasnip.jumpable(-1) then
+              luasnip.jump(-1)
+            else
+              fallback()
+            end
+          end, { "i", "s" }),
+        }),
+        sources = cmp.config.sources({
+          { name = "nvim_lsp" },
+          { name = "luasnip" },
+        }, {
+          { name = "buffer" },
+        }),
+      })
+
+      -- Setup LSP servers
+      -- Lua
+      lspconfig.lua_ls.setup({
+        settings = {
+          Lua = {
+            runtime = {
+              version = "LuaJIT",
+              path = vim.split(package.path, ";"),
+            },
+            diagnostics = {
+              globals = { "vim" },
+            },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+              checkThirdParty = false,
+            },
+            telemetry = {
+              enable = false,
+            },
+          },
+        },
+        capabilities = require("cmp_nvim_lsp").default_capabilities(),
+      })
+
+      -- Go
+      lspconfig.gopls.setup({
+        capabilities = require("cmp_nvim_lsp").default_capabilities(),
+      })
+
+      -- Java / Gradle
+      lspconfig.jdtls.setup({
+        cmd = { "jdtls" },
+        root_dir = lspconfig.util.root_pattern(".git", "mvnw", "gradlew", "pom.xml", "build.gradle"),
+        capabilities = require("cmp_nvim_lsp").default_capabilities(),
+      })
+
+      -- Ansible
+      lspconfig.ansiblels.setup({
+        capabilities = require("cmp_nvim_lsp").default_capabilities(),
+      })
+
+      -- JavaScript / TypeScript
+      lspconfig.ts_ls.setup({
+        capabilities = require("cmp_nvim_lsp").default_capabilities(),
+      })
+
+      -- Python
+      lspconfig.pyright.setup({
+        capabilities = require("cmp_nvim_lsp").default_capabilities(),
+      })
+    end,
+  },
+
   -- Telescope
   {
     "nvim-telescope/telescope.nvim",
@@ -61,19 +188,20 @@ return {
 
   -- Undotree
   {
-	  "jiaoshijie/undotree",
-	  dependencies = "nvim-lua/plenary.nvim",
-	  config = true,
-	  keys = { -- load the plugin only when using it's keybinding:
-		  { "<leader>u", "<cmd>lua require('undotree').toggle()<cr>" },
-	  },
+    "jiaoshijie/undotree",
+    dependencies = "nvim-lua/plenary.nvim",
+    config = true,
+    keys = {
+      { "<leader>u", "<cmd>lua require('undotree').toggle()<cr>" },
+    },
   },
+
   -- Fugitive
   {
-	  "tpope/vim-fugitive",
-	  keys = {
-		  { "<leader>gs", function() vim.cmd.Git() end, desc = "Git Status" },
-	  },
+    "tpope/vim-fugitive",
+    keys = {
+      { "<leader>gs", function() vim.cmd.Git() end, desc = "Git Status" },
+    },
   },
 
   -- Lazy itself (optional to list)

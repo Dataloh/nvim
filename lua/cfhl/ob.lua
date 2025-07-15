@@ -1,3 +1,5 @@
+require("cfhl.password_manager")
+
 vim.keymap.set("n", "<leader>r", function()
   local line = vim.api.nvim_get_current_line()
   local eq_pos = string.find(line, "=")
