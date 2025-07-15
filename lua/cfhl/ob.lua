@@ -1,5 +1,19 @@
 require("cfhl.password_manager")
 
+vim.api.nvim_create_user_command("SetPassword", function(opts)
+  local password = opts.args
+  if not password or password == "" then
+    print("Usage: :SetPassword <your-password>")
+    return
+  end
+
+  SetPassword(password)
+end, {
+  nargs = 1,
+  complete = nil,
+  desc = "Set password for current file path context",
+})
+
 vim.keymap.set("n", "<leader>r", function()
   local line = vim.api.nvim_get_current_line()
   local eq_pos = string.find(line, "=")
