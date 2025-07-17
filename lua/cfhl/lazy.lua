@@ -182,7 +182,6 @@ return {
       { "<C-h>", function() require("harpoon.ui").nav_file(1) end, desc = "Harpoon File 1" },
       { "<C-t>", function() require("harpoon.ui").nav_file(2) end, desc = "Harpoon File 2" },
       { "<C-n>", function() require("harpoon.ui").nav_file(3) end, desc = "Harpoon File 3" },
-      { "<C-s>", function() require("harpoon.ui").nav_file(4) end, desc = "Harpoon File 4" },
     },
   },
 
